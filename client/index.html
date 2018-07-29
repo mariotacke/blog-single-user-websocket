@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Single User Websocket</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+  <script src="index.js"></script>
+</head>
+<body>
+  <h1>Single User Websocket Demo</h1>
+  <p>
+    <label for="status">Status: </label>
+    <input type="text" id="status"
+      name="status" value="Disconnected"
+      readonly="readonly" style="width: 300px;"
+    />
+  </p>
+  <p>
+    <label for="token">My Token: </label>
+    <input type="text" id="token" name="token" value="secret token" />
+  </p>
+  <p>
+    <button id="connect" onclick="connect()">
+      Connect
+    </button>
+    <button id="disconnect" onclick="disconnect()" disabled>
+      Disconnect
+    </button>
+  </p>
+</body>
+</html>
