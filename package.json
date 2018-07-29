@@ -23,6 +23,7 @@
     "serve": "^9.4.0"
   },
   "dependencies": {
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "socketio-auth": "^0.1.1"
   }
 }

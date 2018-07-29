@@ -7,6 +7,8 @@ let statusInput;
 let tokenInput;
 
 const connect = () => {
+  let error = null;
+
   socket = io(socketUrl, {
     autoConnect: false,
   });
@@ -16,14 +18,27 @@ const connect = () => {
     statusInput.value = 'Connected';
     connectButton.disabled = true;
     disconnectButton.disabled = false;
+
+    socket.emit('authentication', {
+      token: tokenInput.value,
+    });
+  });
+
+  socket.on('unauthorized', (reason) => {
+    console.log('Unauthorized:', reason);
+
+    error = reason.message;
+
+    socket.disconnect();
   });
 
   socket.on('disconnect', (reason) => {
-    console.log(`Disconnected: ${reason}`);
-    statusInput.value = `Disconnected: ${reason}`;
+    console.log(`Disconnected: ${error || reason}`);
+    statusInput.value = `Disconnected: ${error || reason}`;
     connectButton.disabled = false;
     disconnectButton.disabled = true;
-  })
+    error = null;
+  });
 
   socket.open();
 };
