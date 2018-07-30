@@ -3,6 +3,8 @@ const io = require('socket.io')();
 const socketAuth = require('socketio-auth');
 const adapter = require('socket.io-redis');
 
+const redis = require('./redis');
+
 const PORT = process.env.PORT || 9000;
 const server = http.createServer();
 
@@ -46,6 +48,12 @@ socketAuth(io, {
 
     try {
       const user = await verifyUser(token);
+      const canConnect = await redis
+        .setAsync(`users:${user.id}`, socket.id, 'NX', 'EX', 30);
+
+      if (!canConnect) {
+        return callback({ message: 'ALREADY_LOGGED_IN' });
+      }
 
       socket.user = user;
 
@@ -55,11 +63,21 @@ socketAuth(io, {
       return callback({ message: 'UNAUTHORIZED' });
     }
   },
-  postAuthenticate: (socket) => {
+  postAuthenticate: async (socket) => {
     console.log(`Socket ${socket.id} authenticated.`);
+
+    socket.conn.on('packet', async (packet) => {
+      if (socket.auth && packet.type === 'ping') {
+        await redis.setAsync(`users:${socket.user.id}`, socket.id, 'XX', 'EX', 30);
+      }
+    });
   },
-  disconnect: (socket) => {
+  disconnect: async (socket) => {
     console.log(`Socket ${socket.id} disconnected.`);
+
+    if (socket.user) {
+      await redis.delAsync(`users:${socket.user.id}`);
+    }
   },
 })
 
